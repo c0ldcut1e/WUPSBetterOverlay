@@ -31,7 +31,7 @@ INCLUDES	:=	imgui src
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(MACHDEP)
 
-CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__ -DLUA_32BITS -DDEBUG -DVERBOSE_DEBUG 
+CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__ -DDEBUG -DVERBOSE_DEBUG 
 
 CXXFLAGS	:= $(CFLAGS) -std=c++20
 
