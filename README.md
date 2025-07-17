@@ -1,6 +1,5 @@
 # WUPSBetterOverlay
 A simple plugin I made for rendering overlays on the screen using GX2 and ImGui.
-A lot of this stuff was taken from [GaryOderNicht](https://github.com/garyodernichts)'s [imgui_overlay_plugin](https://github.com/GaryOderNichts/imgui_overlay_plugin).
 ## Dependencies
 - [WUT](https://github.com/devkitPro/wut)
 - [WUPS](https://github.com/wiiu-env/WiiUPluginSystem)
