@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <shader/ImGuiShader.h>
+#include <shaders/TexShader.h>
 #include <utils/Logger.h>
 #include <utils/Types.h>
 
@@ -10,6 +10,7 @@
 #include <gx2/draw.h>
 #include <gx2/mem.h>
 #include <gx2/registers.h>
+#include <gx2/state.h>
 #include <gx2/utils.h>
 #include <whb/gfx.h>
 
@@ -42,8 +43,7 @@ bool ImGui_ImplGX2_Init() {
     ImGui_ImplGX2_Data *data   = IM_NEW(ImGui_ImplGX2_Data)();
     io.BackendRendererUserData = data;
     io.BackendRendererName     = "imgui_impl_gx2";
-    io.BackendFlags |=
-            ImGuiBackendFlags_RendererHasVtxOffset; // Allow larger meshes
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
     return true;
 }
@@ -63,12 +63,8 @@ void ImGui_ImplGX2_Shutdown() {
 }
 
 void ImGui_ImplGX2_NewFrame() {
-    ImGuiIO &io              = ImGui::GetIO();
     ImGui_ImplGX2_Data *data = ImGui_ImplGX2_GetBackendData();
     IM_ASSERT(data != NULL && "Did you call ImGui_ImplGX2_Init() ?");
-
-    if (io.WantTextInput && !data->osk.open) data->osk.open = true;
-    if (!io.WantTextInput && data->osk.open) data->osk.open = false;
 
     if (!data->shader) ImGui_ImplGX2_CreateDeviceObjects();
 }
@@ -207,6 +203,8 @@ void ImGui_ImplGX2_RenderDrawData(ImDrawData *data) {
         globalVtxOffset += cmdList->VtxBuffer.Size;
         globalIdxOffset += cmdList->IdxBuffer.Size;
     }
+
+    GX2Flush();
 }
 
 bool ImGui_ImplGX2_CreateFontsTexture() {
@@ -282,8 +280,8 @@ bool ImGui_ImplGX2_CreateDeviceObjects() {
     ImGui_ImplGX2_Data *data = ImGui_ImplGX2_GetBackendData();
     data->shader             = IM_NEW(WHBGfxShaderGroup)();
 
-    if (!loadImGuiShader(*data->shader)) OSFatal("loadImGuiShader() failed");
-    initImGuiShaderAttrs(*data->shader);
+    if (!loadTexShader(*data->shader)) OSFatal("loadTexShader() failed");
+    initTexShaderAttrs(*data->shader);
 
     ImGui_ImplGX2_CreateFontsTexture();
 
@@ -299,7 +297,7 @@ void ImGui_ImplGX2_DestroyDeviceObjects() {
     MEMFreeToMappedMemory(data->idxBuffer);
     data->idxBuffer = NULL;
 
-    unloadImGuiShader(*data->shader);
+    unloadTexShader(*data->shader);
     IM_DELETE(data->shader);
     data->shader = NULL;
 

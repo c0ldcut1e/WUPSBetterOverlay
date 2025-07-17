@@ -1,6 +1,7 @@
 #include <wups.h>
 
 #include <Globals.h>
+#include <overlay/Overlay.h>
 #include <utils/CThread.h>
 #include <utils/Logger.h>
 #include <utils/PluginInfo.h>

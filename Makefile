@@ -21,7 +21,7 @@ WUMS_ROOT := $(DEVKITPRO)/wums
 #-------------------------------------------------------------------------------
 TARGET		:=	BetterOverlay
 BUILD		:=	build
-SOURCES		:=	imgui src/imgui_backend src src/overlay src/utils
+SOURCES		:=	imgui src/imgui_backend src src/overlay src/shaders src/utils
 DATA		:=	data
 INCLUDES	:=	imgui src
 

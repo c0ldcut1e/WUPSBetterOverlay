@@ -1,6 +1,7 @@
 #include "Overlay.h"
 
 #include <utils/Logger.h>
+#include <utils/Utils.h>
 
 #include <imgui.h>
 #include <imgui_backend/imgui_impl_gx2.h>
@@ -14,12 +15,14 @@ Overlay::Overlay() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    (void) io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.IniFilename = FS_SD_CARD_PATH "BetterOverlay.ini";
 
     ImGui::StyleColorsDark();
 
-    ImGui_ImplWiiU_Init();
+    ImGui_ImplWiiU_Config config;
+    config.enableControllerInput = true;
+    ImGui_ImplWiiU_Init(config);
     ImGui_ImplGX2_Init();
 }
 
@@ -31,13 +34,12 @@ Overlay::~Overlay() {
 void Overlay::update() {}
 
 void Overlay::draw(uint32_t width, uint32_t height) {
-    constexpr float LOGICAL_WIDTH  = 854.0f;
-    constexpr float LOGICAL_HEIGHT = 480.0f;
+    float32_t drcWidth  = (float32_t) DRC_WIDTH;
+    float32_t drcHeight = (float32_t) DRC_HEIGHT;
 
-    ImGuiIO &io    = ImGui::GetIO();
-    io.DisplaySize = ImVec2(LOGICAL_WIDTH, LOGICAL_HEIGHT);
-    io.DisplayFramebufferScale =
-            ImVec2(width / LOGICAL_WIDTH, height / LOGICAL_HEIGHT);
+    ImGuiIO &io                = ImGui::GetIO();
+    io.DisplaySize             = ImVec2(drcWidth, drcHeight);
+    io.DisplayFramebufferScale = ImVec2(width / drcWidth, height / drcHeight);
 
     ImGui_ImplGX2_NewFrame();
     ImGui::NewFrame();
@@ -45,8 +47,5 @@ void Overlay::draw(uint32_t width, uint32_t height) {
     ImGui::ShowDemoWindow();
 
     ImGui::Render();
-
     ImGui_ImplGX2_RenderDrawData(ImGui::GetDrawData());
-
-    GX2Flush();
 }

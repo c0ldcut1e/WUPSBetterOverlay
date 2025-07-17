@@ -7,36 +7,41 @@
 struct ImGui_ImplWiiU_Data {
     ImGui_ImplWiiU_Data() { memset((void *) this, 0, sizeof(*this)); }
 
+    ImGui_ImplWiiU_Config config;
     bool wasTouched;
 };
 
 static ImGui_ImplWiiU_Data *ImGui_ImplWiiU_GetBackendData() {
     return ImGui::GetCurrentContext() ? (ImGui_ImplWiiU_Data *) ImGui::GetIO()
                                                 .BackendPlatformUserData
-                                      : NULL;
+                                      : nullptr;
 }
 
-bool ImGui_ImplWiiU_Init() {
+bool ImGui_ImplWiiU_Init(ImGui_ImplWiiU_Config config) {
     ImGuiIO &io = ImGui::GetIO();
-    IM_ASSERT(io.BackendPlatformUserData == NULL &&
+    IM_ASSERT(io.BackendPlatformUserData == nullptr &&
               "Already initialized a platform backend!");
 
-    ImGui_ImplWiiU_Data *data  = IM_NEW(ImGui_ImplWiiU_Data)();
+    ImGui_ImplWiiU_Data *data = IM_NEW(ImGui_ImplWiiU_Data)();
+    data->config              = config;
+
     io.BackendPlatformUserData = data;
     io.BackendPlatformName     = "imgui_impl_wiiu";
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+
+    io.KeyRepeatDelay = 0.9f;
+    io.KeyRepeatRate  = 0.15f;
 
     return true;
 }
 
 void ImGui_ImplWiiU_Shutdown() {
     ImGui_ImplWiiU_Data *data = ImGui_ImplWiiU_GetBackendData();
-    IM_ASSERT(data != NULL &&
-              "No platform backend to shutdown, or already shutdown?");
+    IM_ASSERT(data && "No platform backend to shutdown, or already shutdown?");
 
     ImGuiIO &io                = ImGui::GetIO();
-    io.BackendPlatformName     = NULL;
-    io.BackendPlatformUserData = NULL;
+    io.BackendPlatformName     = nullptr;
+    io.BackendPlatformUserData = nullptr;
 
     IM_DELETE(data);
 }
@@ -44,14 +49,14 @@ void ImGui_ImplWiiU_Shutdown() {
 static bool ImGui_ImplWiiU_WantsInput() {
     ImGuiIO &io = ImGui::GetIO();
     return io.WantCaptureMouse || io.WantCaptureKeyboard || io.WantTextInput ||
-           (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) &&
-                   io.NavActive &&
-                   ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow);
+           ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) &&
+            io.NavActive &&
+            ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow));
 }
 
 bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input) {
     ImGui_ImplWiiU_Data *data = ImGui_ImplWiiU_GetBackendData();
-    IM_ASSERT(data != NULL && "Did you call ImGui_ImplWiiU_Init() ?");
+    IM_ASSERT(data && "Did you call ImGui_ImplWiiU_Init() ?");
 
     ImGuiIO &io = ImGui::GetIO();
 
@@ -70,7 +75,7 @@ bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input) {
         data->wasTouched = touch.touched;
     }
 
-    if (ImGui_ImplWiiU_WantsInput()) {
+    if (ImGui_ImplWiiU_WantsInput() && data->config.enableControllerInput) {
         uint32_t held = input->hold;
 
         io.AddKeyEvent(ImGuiKey_GamepadDpadLeft, held & VPAD_BUTTON_LEFT);
@@ -82,7 +87,7 @@ bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input) {
         io.AddKeyEvent(ImGuiKey_GamepadFaceRight, held & VPAD_BUTTON_B);
         io.AddKeyEvent(ImGuiKey_GamepadFaceUp, held & VPAD_BUTTON_Y);
         io.AddKeyEvent(ImGuiKey_GamepadFaceDown, held & VPAD_BUTTON_A);
-        io.AddKeyEvent(ImGuiKey_GamepadStart, held & VPAD_BUTTON_PLUS);
+
         io.AddKeyEvent(ImGuiKey_GamepadLStickLeft,
                        held & VPAD_STICK_L_EMULATION_LEFT);
         io.AddKeyEvent(ImGuiKey_GamepadLStickRight,
@@ -91,14 +96,39 @@ bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input) {
                        held & VPAD_STICK_L_EMULATION_UP);
         io.AddKeyEvent(ImGuiKey_GamepadLStickDown,
                        held & VPAD_STICK_L_EMULATION_DOWN);
-
-        io.AddKeyEvent(ImGuiKey_GamepadL1, held & VPAD_BUTTON_L);
-        io.AddKeyEvent(ImGuiKey_GamepadR1, held & VPAD_BUTTON_R);
     }
 
     return ImGui_ImplWiiU_WantsInput();
 }
 
 bool ImGui_ImplWiiU_ProcessWPADInput(WPADStatusProController *input) {
-    return true; // TODO
+    ImGui_ImplWiiU_Data *data = ImGui_ImplWiiU_GetBackendData();
+    IM_ASSERT(data && "Did you call ImGui_ImplWiiU_Init() ?");
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    if (ImGui_ImplWiiU_WantsInput() && data->config.enableControllerInput) {
+        uint32_t held = input->buttons;
+
+        io.AddKeyEvent(ImGuiKey_GamepadDpadLeft, held & WPAD_PRO_BUTTON_LEFT);
+        io.AddKeyEvent(ImGuiKey_GamepadDpadRight, held & WPAD_PRO_BUTTON_RIGHT);
+        io.AddKeyEvent(ImGuiKey_GamepadDpadUp, held & WPAD_PRO_BUTTON_UP);
+        io.AddKeyEvent(ImGuiKey_GamepadDpadDown, held & WPAD_PRO_BUTTON_DOWN);
+
+        io.AddKeyEvent(ImGuiKey_GamepadFaceLeft, held & WPAD_PRO_BUTTON_X);
+        io.AddKeyEvent(ImGuiKey_GamepadFaceRight, held & WPAD_PRO_BUTTON_B);
+        io.AddKeyEvent(ImGuiKey_GamepadFaceUp, held & WPAD_PRO_BUTTON_Y);
+        io.AddKeyEvent(ImGuiKey_GamepadFaceDown, held & WPAD_PRO_BUTTON_A);
+
+        io.AddKeyEvent(ImGuiKey_GamepadLStickLeft,
+                       held & WPAD_PRO_STICK_L_EMULATION_LEFT);
+        io.AddKeyEvent(ImGuiKey_GamepadLStickRight,
+                       held & WPAD_PRO_STICK_L_EMULATION_RIGHT);
+        io.AddKeyEvent(ImGuiKey_GamepadLStickUp,
+                       held & WPAD_PRO_STICK_L_EMULATION_UP);
+        io.AddKeyEvent(ImGuiKey_GamepadLStickDown,
+                       held & WPAD_PRO_STICK_L_EMULATION_DOWN);
+    }
+
+    return ImGui_ImplWiiU_WantsInput();
 }

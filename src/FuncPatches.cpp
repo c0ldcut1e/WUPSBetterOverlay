@@ -114,12 +114,21 @@ DECL_FUNCTION(int32_t, VPADRead, VPADChan chan, VPADStatus *input,
     if (res > 0 && realErr == VPAD_READ_SUCCESS)
         if (ImGui_ImplWiiU_ProcessVPADInput(&input[0]))
             for (uint32_t i = 0; i < count; i++)
-                for (uint32_t i = 0; i < count; ++i)
+                for (uint32_t i = 0; i < count; i++)
                     memset(&input[i], 0, sizeof(VPADStatus));
 
     if (err) *err = realErr;
 
     return res;
+}
+
+DECL_FUNCTION(void, WPADRead, WPADChan chan, WPADStatus *input) {
+    real_WPADRead(chan, input);
+
+    WPADStatusProController *pro = (WPADStatusProController *) input;
+    if (pro->core.extensionType == WPAD_EXT_PRO_CONTROLLER)
+        if (ImGui_ImplWiiU_ProcessWPADInput(pro))
+            memset(&pro->buttons, 0, sizeof(pro->buttons));
 }
 
 WUPS_MUST_REPLACE(GX2GetCurrentScanBuffer, WUPS_LOADER_LIBRARY_GX2,
@@ -139,3 +148,4 @@ WUPS_MUST_REPLACE(GX2SwapScanBuffers, WUPS_LOADER_LIBRARY_GX2,
                   GX2SwapScanBuffers);
 
 WUPS_MUST_REPLACE(VPADRead, WUPS_LOADER_LIBRARY_VPAD, VPADRead);
+WUPS_MUST_REPLACE(WPADRead, WUPS_LOADER_LIBRARY_PADSCORE, WPADRead);

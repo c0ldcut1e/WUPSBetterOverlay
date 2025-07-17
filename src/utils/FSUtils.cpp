@@ -49,7 +49,6 @@ int32_t FSUtils::CreateSubfolder(const char *fullpath) {
         char *ptr = strrchr(parentpath, '/');
 
         if (!ptr) {
-            //!Device root directory (must be with '/')
             strcat(parentpath, "/");
             struct stat filestat;
             if (stat(parentpath, &filestat) == 0) return 1;
@@ -84,8 +83,6 @@ int32_t FSUtils::saveBufferToFile(const char *path, void *buffer,
 }
 
 bool FSUtils::copyFile(const std::string &in, const std::string &out) {
-    // Using C++ buffers is **really** slow. Copying in 1023 byte chunks.
-    // Let's do it the old way.
     size_t size;
 
     int source = open(in.c_str(), O_RDONLY, 0);
