@@ -20,9 +20,7 @@ Overlay::Overlay() {
 
     ImGui::StyleColorsDark();
 
-    ImGui_ImplWiiU_Config config;
-    config.enableControllerInput = true;
-    ImGui_ImplWiiU_Init(config);
+    ImGui_ImplWiiU_Init();
     ImGui_ImplGX2_Init();
 }
 

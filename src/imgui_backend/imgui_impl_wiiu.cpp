@@ -7,7 +7,6 @@
 struct ImGui_ImplWiiU_Data {
     ImGui_ImplWiiU_Data() { memset((void *) this, 0, sizeof(*this)); }
 
-    ImGui_ImplWiiU_Config config;
     bool wasTouched;
 };
 
@@ -17,14 +16,12 @@ static ImGui_ImplWiiU_Data *ImGui_ImplWiiU_GetBackendData() {
                                       : nullptr;
 }
 
-bool ImGui_ImplWiiU_Init(ImGui_ImplWiiU_Config config) {
+bool ImGui_ImplWiiU_Init() {
     ImGuiIO &io = ImGui::GetIO();
     IM_ASSERT(io.BackendPlatformUserData == nullptr &&
               "Already initialized a platform backend!");
 
-    ImGui_ImplWiiU_Data *data = IM_NEW(ImGui_ImplWiiU_Data)();
-    data->config              = config;
-
+    ImGui_ImplWiiU_Data *data  = IM_NEW(ImGui_ImplWiiU_Data)();
     io.BackendPlatformUserData = data;
     io.BackendPlatformName     = "imgui_impl_wiiu";
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
@@ -75,7 +72,7 @@ bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input) {
         data->wasTouched = touch.touched;
     }
 
-    if (ImGui_ImplWiiU_WantsInput() && data->config.enableControllerInput) {
+    if (ImGui_ImplWiiU_WantsInput()) {
         uint32_t held = input->hold;
 
         io.AddKeyEvent(ImGuiKey_GamepadDpadLeft, held & VPAD_BUTTON_LEFT);
@@ -105,9 +102,9 @@ bool ImGui_ImplWiiU_ProcessWPADInput(WPADStatusProController *input) {
     ImGui_ImplWiiU_Data *data = ImGui_ImplWiiU_GetBackendData();
     IM_ASSERT(data && "Did you call ImGui_ImplWiiU_Init() ?");
 
-    ImGuiIO &io = ImGui::GetIO();
+    /* ImGuiIO &io = ImGui::GetIO();
 
-    if (ImGui_ImplWiiU_WantsInput() && data->config.enableControllerInput) {
+    if (ImGui_ImplWiiU_WantsInput()) {
         uint32_t held = input->buttons;
 
         io.AddKeyEvent(ImGuiKey_GamepadDpadLeft, held & WPAD_PRO_BUTTON_LEFT);
@@ -128,7 +125,7 @@ bool ImGui_ImplWiiU_ProcessWPADInput(WPADStatusProController *input) {
                        held & WPAD_PRO_STICK_L_EMULATION_UP);
         io.AddKeyEvent(ImGuiKey_GamepadLStickDown,
                        held & WPAD_PRO_STICK_L_EMULATION_DOWN);
-    }
+    } */
 
     return ImGui_ImplWiiU_WantsInput();
 }

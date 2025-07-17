@@ -5,11 +5,7 @@
 #include <padscore/wpad.h>
 #include <vpad/input.h>
 
-struct ImGui_ImplWiiU_Config {
-    bool enableControllerInput = true;
-};
-
-IMGUI_IMPL_API bool ImGui_ImplWiiU_Init(ImGui_ImplWiiU_Config config);
+IMGUI_IMPL_API bool ImGui_ImplWiiU_Init();
 IMGUI_IMPL_API void ImGui_ImplWiiU_Shutdown();
 IMGUI_IMPL_API bool ImGui_ImplWiiU_ProcessVPADInput(VPADStatus *input);
 IMGUI_IMPL_API bool
